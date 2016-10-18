@@ -35,12 +35,11 @@ class UglifyJSOptimizer {
 
     this.options.outSourceMap = this.options.sourceMaps ?
       path + '.map' : undefined;
-
     try {
       this.options.fromString = true;
-      console.log('file');
       optimized = uglify.minify(data, this.options);
-      optimized.code = optimized.code.replace(/([^\"])function\"(.+?)"\(/igm, '$1function $2(');
+      // fix for functions with non alpha chars
+      optimized.code = optimized.code.replace(/([^\"])function\"([a-z].+?)"\(/igm, '$1function $2(');
     } catch (_error) {
       error = 'JS minification failed on ' + path + ': ' + _error;
     } finally {
@@ -52,6 +51,7 @@ class UglifyJSOptimizer {
         data: optimized.code
       };
       result.data = result.data.replace(/\n\/\/# sourceMappingURL=\S+$/, '');
+
       return Promise.resolve(result);
     }
   }
